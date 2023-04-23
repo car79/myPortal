@@ -24,11 +24,11 @@ function lavoro_preprocess_views_view_field(&$variables)
   $field = $variables["field"];
   $row = $variables["row"];
   date_default_timezone_set('UTC');
-  if (isset($view) && $view->id() == "ore_lavorative" && $view->current_display == "view_ore_lavorative") {
+  if (isset($view) && $view->id() == "ore_lavorative" && $view->current_display == "ore_lavorative") {
 
     $da = $row->_entity->get('field_da')->value;
     $a = $row->_entity->get('field_a')->value;
-    $ore_lav = $row->_entity->get("field_ore_lav_")->value;
+    $ore_lav = $row->_entity->get("field_ore_lav")->value;
     $days = getWorkingDays($da, $a, []);
     $days = $days == 0 ? 1 : $days;
     if ($field->options["id"] == "nothing") {
@@ -39,8 +39,8 @@ function lavoro_preprocess_views_view_field(&$variables)
       $GG = sprintf("%02s", (int) $GGLav);
       $perc = $GGLav - (int) $GGLav;
       $resto = ((8 * 3600) * $perc);
-      dpm($resto);
-      $cc = date("H:i", $resto);
+      //dpm($resto);
+      $cc = date("H:i", (int)$resto);
       $variables["output"] = ViewsRenderPipelineMarkup::create("<b>$GG:$cc</b>");
     }
   }
@@ -50,18 +50,21 @@ function lavoro_preprocess_views_view_field(&$variables)
  */
 function lavoro_views_pre_render(ViewExecutable $view)
 {
-  if ($view->id() == "ore_lavorative" && $view->current_display == "view_ore_lavorative") {
+  date_default_timezone_set('UTC');
+  if ($view->id() == "ore_lavorative" && $view->current_display == "ore_lavorative") {
     $tot = 0;
     foreach ($view->result as $key => $row) {
       $da = $row->_entity->get('field_da')->value;
       $a = $row->_entity->get('field_a')->value;
-      $ore_lav = $row->_entity->get("field_ore_lav_")->value;
+      $ore_lav = $row->_entity->get("field_ore_lav")->value;
       $days = getWorkingDays($da, $a, []);
       $GGLav = ($ore_lav * $days) / (8 * 3600);
       $tot += $GGLav;
     }
     $GG = sprintf("%02s", (int) $tot);
     $perc = $tot - (int) $tot;
+
+    dpm($perc);
     $resto = ((8 * 3600) * $perc);
     dpm($resto);
     $cc = date("H:i", (int)$resto);

@@ -26,9 +26,6 @@ function node_ore_lavorative_form_validate(&$form, \Drupal\Core\Form\FormStateIn
   if ($da < $a) {
     $form_state->setErrorByName("data", t('La data del campo "Da" non può essere mggiore di "A"'));
   }
-  //if ($form_state["values"]["field_da"] > $form_state["values"]["field_a"]) {
-  //  dpm("error");
-  //};
 }
 /**
  * Implements hook_preprocess_HOOK().
@@ -76,11 +73,11 @@ function lavoro_views_pre_render(ViewExecutable $view)
       $GGLav = ($ore_lav * $days) / (8 * 3600);
       $tot += $GGLav;
     }
-    $GG = sprintf("%02s", (int) $tot);
+    $Giorni = sprintf("%02s", (int) $tot);
     $perc = $tot - (int) $tot;
     $resto = ((8 * 3600) * $perc);
-    $cc = date("H:i", (int)$resto);
-    $view->attachment_before = Markup::create("<b>$GG:$cc</b>");
+    $ore = date("H:i", (int)$resto);
+    $view->attachment_before = Markup::create("<b>$Giorni:$ore</b>");
   }
 }
 
@@ -144,10 +141,3 @@ function getWorkingDays($startDate, $endDate, $holidays)
 
   return $workingDays;
 }
-
-/* Example:
-
-$holidays=array("2008-12-25","2008-12-26","2009-01-01");
-
-echo getWorkingDays("2008-12-22","2009-01-02",$holidays)
- => will return 7 */

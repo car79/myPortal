@@ -77,7 +77,7 @@ function lavoro_views_pre_render(ViewExecutable $view)
     $perc = $tot - (int) $tot;
     $resto = ((8 * 3600) * $perc);
     $ore = date("H:i", (int)$resto);
-    $view->attachment_before = Markup::create("<b>$Giorni:$ore</b>");
+    $view->attachment_before = Markup::create("<H1>Totale giorni effettivi <b>$Giorni:$ore</b></H1>");
   }
 }
 

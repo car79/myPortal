@@ -9,6 +9,14 @@ use Drupal\views\Render\ViewsRenderPipelineMarkup;
  * Primary module hooks for lavoro module.
  */
 /**
+ * Implements hook_theme().
+ */
+function lavoro_theme($existing, $type, $theme, $path)
+{
+  dpm($existing);
+  return [];
+}
+/**
  * Implements hook_form_alter().
  */
 function lavoro_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id)
@@ -53,9 +61,17 @@ function lavoro_preprocess_views_view_field(&$variables)
       $resto = ((8 * 3600) * $perc);
       //dpm($resto);
       $cc = date("H:i", (int)$resto);
-      $variables["output"] = ViewsRenderPipelineMarkup::create("<b>$GG:$cc</b>");
+      $variables["output"] = ViewsRenderPipelineMarkup::create("<b>$GG gg. $cc</b>");
     }
   }
+}
+/**
+ * Implements hook_views_data_alter().
+ */
+function lavoro_views_data_alter(array &$data)
+{
+  $data['node_field_data']['nid']['title'] = t('Node-Nid');
+  dpm($data['node__field_a']);
 }
 /**
  * Implements hook_views_pre_render().
@@ -70,14 +86,14 @@ function lavoro_views_pre_render(ViewExecutable $view)
       $a = $row->_entity->get('field_a')->value;
       $ore_lav = $row->_entity->get("field_ore_lav")->value;
       $days = getWorkingDays($da, $a, []);
-      $GGLav = ($ore_lav * $days) / (8 * 3600);
-      $tot += $GGLav;
+      //$GGLav = ($ore_lav * $days) / (8 * 3600);
+      $tot += ($ore_lav * $days) / (8 * 3600);
     }
     $Giorni = sprintf("%02s", (int) $tot);
     $perc = $tot - (int) $tot;
     $resto = ((8 * 3600) * $perc);
     $ore = date("H:i", (int)$resto);
-    $view->attachment_before = Markup::create("<H1>Totale giorni effettivi <b>$Giorni:$ore</b></H1>");
+    $view->attachment_before = Markup::create("<b>Totale: $Giorni gg. $ore</b>");
   }
 }
 

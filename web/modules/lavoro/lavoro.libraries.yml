@@ -1,0 +1,4 @@
+lavoro_orelav:
+  css:
+    component:
+      css/lavoro-orelav-widget.css: {}

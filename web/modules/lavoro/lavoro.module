@@ -16,9 +16,11 @@ function lavoro_entity_base_field_info(\Drupal\Core\Entity\EntityTypeInterface $
 {
   if ($entity_type->id() == "node") {
     $fields = [];
-    $fields["ore_lav"] = BaseFieldDefinition::create("integer")->setLabel("Ore Lavorative Prova")->setComputed(TRUE)->setDisplayOptions('form', [
-      'type' => "integer"
-    ])->setDisplayOptions('view', ['label' => 'hidden', 'type' => 'integer'])->setDisplayConfigurable("form", TRUE);
+    $fields["ore_lav"] = BaseFieldDefinition::create("integer")->setLabel("Ore Lavorative Prova")->setComputed(TRUE)
+      ->setDisplayOptions(
+        'view',
+        ['label' => 'hidden', 'weight' => -5]
+      )->setDisplayConfigurable("view", TRUE)->setClass('\Drupal\lavoro\OreLavItemList');
     //dpm($fields);
     return $fields;
   }

@@ -1,5 +1,6 @@
 <?php
 
+use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Render\Markup;
 use Drupal\views\ViewExecutable;
 use Drupal\views\Render\ViewsRenderPipelineMarkup;
@@ -9,13 +10,20 @@ use Drupal\views\Render\ViewsRenderPipelineMarkup;
  * Primary module hooks for lavoro module.
  */
 /**
- * Implements hook_theme().
+ * Implements hook_entity_base_field_info().
  */
-function lavoro_theme($existing, $type, $theme, $path)
+function lavoro_entity_base_field_info(\Drupal\Core\Entity\EntityTypeInterface $entity_type)
 {
-  dpm($existing);
-  return [];
+  if ($entity_type->id() == "node") {
+    $fields = [];
+    $fields["ore_lav"] = BaseFieldDefinition::create("integer")->setLabel("Ore Lavorative Prova")->setComputed(TRUE)->setDisplayOptions('form', [
+      'type' => "integer"
+    ])->setDisplayOptions('view', ['label' => 'hidden', 'type' => 'integer'])->setDisplayConfigurable("form", TRUE);
+    //dpm($fields);
+    return $fields;
+  }
 }
+
 /**
  * Implements hook_form_alter().
  */
@@ -71,7 +79,7 @@ function lavoro_preprocess_views_view_field(&$variables)
 function lavoro_views_data_alter(array &$data)
 {
   $data['node_field_data']['nid']['title'] = t('Node-Nid');
-  dpm($data['node__field_a']);
+  dpm($data['node_field_data']);
 }
 /**
  * Implements hook_views_pre_render().

@@ -4,26 +4,39 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Render\Markup;
 use Drupal\views\ViewExecutable;
 use Drupal\views\Render\ViewsRenderPipelineMarkup;
+use Psy\Readline\Hoa\Console;
 
 /**
  * @file
  * Primary module hooks for lavoro module.
  */
 /**
- * Implements hook_entity_base_field_info().
+ * Implements hook_entity_bundle_field_info().
  */
-function lavoro_entity_base_field_info(\Drupal\Core\Entity\EntityTypeInterface $entity_type)
+function lavoro_entity_bundle_field_info(\Drupal\Core\Entity\EntityTypeInterface $entity_type, $bundle, array $base_field_definitions)
 {
-  if ($entity_type->id() == "node") {
+
+  if ($entity_type->id() == "node" && $bundle == "ore_lavorative") {
     $fields = [];
-    $fields["ore_lav"] = BaseFieldDefinition::create("integer")->setLabel("Ore Lavorative Prova")->setComputed(TRUE)
+    $fields["giorni_lavorativi"] = BaseFieldDefinition::create("integer")->setLabel("Giorni Lavorativi")->setComputed(TRUE)
       ->setDisplayOptions(
         'view',
         ['label' => 'hidden', 'weight' => -5]
-      )->setDisplayConfigurable("view", TRUE)->setClass('\Drupal\lavoro\OreLavItemList');
-    //dpm($fields);
+      )->setDisplayConfigurable("view", TRUE)->setClass('\Drupal\lavoro\GiorniLavItemList');
     return $fields;
   }
+}
+/**
+ * Implements hook_views_data_alter().
+ */
+function lavoro_views_data_alter(array &$data)
+{
+  $data['node']['giorni_lavorativi'] = [
+    'title' => t('Giorni Lavorativi'),
+    'field' => [
+      'id' => 'lavoro_view_giorni_lavorativi',
+    ],
+  ];
 }
 
 /**
@@ -50,7 +63,7 @@ function node_ore_lavorative_form_validate(&$form, \Drupal\Core\Form\FormStateIn
  */
 function lavoro_preprocess_views_view_field(&$variables)
 {
-  $view = $variables["view"];
+  /*  $view = $variables["view"];
   $field = $variables["field"];
   $row = $variables["row"];
   date_default_timezone_set('UTC');
@@ -73,22 +86,15 @@ function lavoro_preprocess_views_view_field(&$variables)
       $cc = date("H:i", (int)$resto);
       $variables["output"] = ViewsRenderPipelineMarkup::create("<b>$GG gg. $cc</b>");
     }
-  }
+  } */
 }
-/**
- * Implements hook_views_data_alter().
- */
-function lavoro_views_data_alter(array &$data)
-{
-  $data['node_field_data']['nid']['title'] = t('Node-Nid');
-  dpm($data['node_field_data']);
-}
+
 /**
  * Implements hook_views_pre_render().
  */
 function lavoro_views_pre_render(ViewExecutable $view)
 {
-  date_default_timezone_set('UTC');
+  /*  date_default_timezone_set('UTC');
   if ($view->id() == "ore_lavorative" && $view->current_display == "ore_lavorative") {
     $tot = 0;
     foreach ($view->result as $key => $row) {
@@ -104,66 +110,5 @@ function lavoro_views_pre_render(ViewExecutable $view)
     $resto = ((8 * 3600) * $perc);
     $ore = date("H:i", (int)$resto);
     $view->attachment_before = Markup::create("<b>Totale: $Giorni gg. $ore</b>");
-  }
-}
-
-function getWorkingDays($startDate, $endDate, $holidays)
-{
-  // do strtotime calculations just once
-  $endDate = strtotime($endDate);
-  $startDate = strtotime($startDate);
-
-
-  //The total number of days between the two dates. We compute the no. of seconds and divide it to 60*60*24
-  //We add one to inlude both dates in the interval.
-  $days = ($endDate - $startDate) / 86400 + 1;
-
-  $no_full_weeks = floor($days / 7);
-  $no_remaining_days = fmod($days, 7);
-
-  //It will return 1 if it's Monday,.. ,7 for Sunday
-  $the_first_day_of_week = date("N", $startDate);
-  $the_last_day_of_week = date("N", $endDate);
-
-  //---->The two can be equal in leap years when february has 29 days, the equal sign is added here
-  //In the first case the whole interval is within a week, in the second case the interval falls in two weeks.
-  if ($the_first_day_of_week <= $the_last_day_of_week) {
-    if ($the_first_day_of_week <= 6 && 6 <= $the_last_day_of_week) $no_remaining_days--;
-    if ($the_first_day_of_week <= 7 && 7 <= $the_last_day_of_week) $no_remaining_days--;
-  } else {
-    // (edit by Tokes to fix an edge case where the start day was a Sunday
-    // and the end day was NOT a Saturday)
-
-    // the day of the week for start is later than the day of the week for end
-    if ($the_first_day_of_week == 7) {
-      // if the start date is a Sunday, then we definitely subtract 1 day
-      $no_remaining_days--;
-
-      if ($the_last_day_of_week == 6) {
-        // if the end date is a Saturday, then we subtract another day
-        $no_remaining_days--;
-      }
-    } else {
-      // the start date was a Saturday (or earlier), and the end date was (Mon..Fri)
-      // so we skip an entire weekend and subtract 2 days
-      $no_remaining_days -= 2;
-    }
-  }
-
-  //The no. of business days is: (number of weeks between the two dates) * (5 working days) + the remainder
-  //---->february in none leap years gave a remainder of 0 but still calculated weekends between first and last day, this is one way to fix it
-  $workingDays = $no_full_weeks * 5;
-  if ($no_remaining_days > 0) {
-    $workingDays += $no_remaining_days;
-  }
-
-  //We subtract the holidays
-  foreach ($holidays as $holiday) {
-    $time_stamp = strtotime($holiday);
-    //If the holiday doesn't fall in weekend
-    if ($startDate <= $time_stamp && $time_stamp <= $endDate && date("N", $time_stamp) != 6 && date("N", $time_stamp) != 7)
-      $workingDays--;
-  }
-
-  return $workingDays;
+  } */
 }
